@@ -1,0 +1,19 @@
+{
+  "name": "mongo-shopping-list",
+  "version": "0.0.1",
+  "description": "mongo shopping list",
+  "main": "server.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ailijic/mongo-shopping-list.git"
+  },
+  "author": "Ailijic",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/ailijic/mongo-shopping-list/issues"
+  },
+  "homepage": "https://github.com/ailijic/mongo-shopping-list#readme"
+}
