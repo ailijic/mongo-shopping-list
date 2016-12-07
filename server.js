@@ -19,8 +19,9 @@ function start () {
           return res.status(500).json({
             message: 'Internal Server Error'
           })
+        } else {
+          return res.json(items)
         }
-        res.json(items)
       })
     })
 
@@ -33,7 +34,21 @@ function start () {
             message: 'Internal Server Error'
           })
         } else {
-          res.status(201).json(item)
+          return res.status(201).json(item)
+        }
+      })
+    })
+
+    app.delete('/items/:id', (req, res) => {
+      Item.remove({
+        _id: req.params.id
+      }, (err, item) => {
+        if (err) {
+          return res.status(500).json({
+            message: 'Internal Server Error'
+          })
+        } else {
+          return res.status(200).json(item)
         }
       })
     })
