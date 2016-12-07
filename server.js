@@ -53,6 +53,19 @@ function start () {
       })
     })
 
+    app.put('/items/:id', (req, res) => {
+      Item.update({ _id: req.params.id }, { name: req.body.name },
+      (err, item) => {
+        if (err) {
+          return res.status(500).json({
+            message: 'Internal Server Error'
+          })
+        } else {
+          return res.status(200).json(item)
+        }
+      })
+    })
+
     app.use('*', (req, res) => {
       res.status(404).json({
         message: 'Not Found'
