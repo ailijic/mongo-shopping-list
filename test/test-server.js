@@ -1,3 +1,4 @@
+/* global it, before, after, describe */
 start()
 function start () {
   'use strict'
@@ -10,20 +11,22 @@ function start () {
   const server = require('../server.js')
   const Item = require('../models/item')
 
-  const should = chai.should()
+  const should = chai.should() // eslint-disable-line 
+  const expect = chai.expect
   const app = server.app
 
   chai.use(chaiHttp)
 
   describe('Shopping List', () => {
+    const initDB = [
+      {name: 'Broad beans'},
+      {name: 'Tomatoes'},
+      {name: 'Peppers'}
+    ]
+
     before(done => {
       server.runServer(() => {
-        Item.create(
-          {name: 'Broad beans'},
-          {name: 'Tomatoes'},
-          {name: 'Peppers'},
-          () => done()
-        )
+        Item.create(initDB[0], initDB[1], initDB[2], () => done())
       })
     })
 
@@ -33,27 +36,30 @@ function start () {
       )
     })
 
-    let id = null
-    it('should list items on GET', (done) => {
+    it('should list items on GET', done => {
+      let stat = 200
+      let len = 3
       chai.request(app)
         .get('/items')
         .end((err, res) => {
-          id = res.body[0].id
-          res.should.have.status(200)
+          expect(err).to.be.null
+          res.should.have.status(stat)
           res.should.be.json
-          res.body.should.be.a('array')
-          res.body.should.have.length(3)
-          res.body[0].should.be.a('object')
-          res.body[0].should.have.property('id')
-          res.body[0].should.have.property('name')
-          res.body[0].id.should.be.a('number')
-          res.body[0].name.should.be.a('string')
-          res.body[0].name.should.equal('Broad beans')
-          res.body[1].name.should.equal('Tomatoes')
-          res.body[2].name.should.equal('Peppers')
+          res.body.should.be.an('array')
+          res.body.length.should.equal(len)
+          res.body.forEach((data, index) => {
+            data.should.be.an('object')
+            data.should.have.property('_id')
+            data.should.have.property('name')
+            data._id.should.be.a('string')
+            data.name.should.be.a('string')
+            data.name.should.equal(initDB[index].name)
+          })
+
           done()
         })
     })
+    /*
     it('should add an item on POST', (done) => {
       chai.request(app)
         .post('/items')
@@ -233,6 +239,6 @@ function start () {
         res.should.have.status(404)
         done()
       })
-    })
+    })  */
   })
 }
