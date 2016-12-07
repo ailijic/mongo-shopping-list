@@ -9,6 +9,8 @@ function start () {
   addRoutes()
 
   function addRoutes () {
+    // TODO: Factor out logic for the return response (Maybe use a curry function)
+
     const Item = require('./models/item')
 
     app.get('/items', (req, res) => {
