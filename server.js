@@ -1,6 +1,3 @@
-import { hi } from './sweet_code.js'
-hi
-
 start()
 function start () {
   'use strict'
