@@ -48,12 +48,19 @@ function start () {
       })
 
       // Generic test
-      function aTest (stat, len, done, err, res) {
+      function genTest (stat, currentDB, err, res) {
         expect(err).to.be.null
         res.should.have.status(stat)
         res.should.be.json
+
+        Item.find({ name: /.*/ }, (err, docs) => {
+          console.log(docs)
+        })
+
+        // change test so that is compares current DB with initDB
+
         res.body.should.be.an('array')
-        res.body.length.should.equal(len)
+        res.body.length.should.equal(initDB.length)
         res.body.forEach((data, index) => {
           data.should.be.an('object')
           data.should.have.property('_id')
@@ -62,23 +69,28 @@ function start () {
           data.name.should.be.a('string')
           data.name.should.equal(initDB[index].name)
         })
-        done()
       }
 
       it('should list items on GET', done => {
-        const stat = 200
-        const len = initDB.length
-        const myTest = curryIt(aTest, stat, len, done)
         chai.request(app)
           .get('/items')
-          .end(myTest)
+          .end((err, res) => {
+            const status = 200
+            genTest(status, initDB, err, res)
+            done()
+          })
       })
-      /*
+
       it('should add an item on POST', (done) => {
+        const stat = 201
+        const db = initDB.push({ name: 'Kale' })
+        const myTest = curryIt(aTest, stat, db, done)
         chai.request(app)
           .post('/items')
           .send({'name': 'Kale'})
-          .end((err, res) => {
+          .end(myTest)
+          /*
+            (err, res) => {
             should.equal(err, null)
             res.should.have.status(201)
             res.should.be.json
@@ -98,7 +110,9 @@ function start () {
             storage.items[3].name.should.equal('Kale')
             done()
           })
+          */
       })
+      /*
       it('should delete an item on DELETE', (done) => {
         const id = 2
         const length = 3
