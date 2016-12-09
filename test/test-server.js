@@ -126,7 +126,7 @@ function start () {
               }
             })
             initDB.splice(indexToDelete,
-              removeOneItem 
+              removeOneItem
             )
             chai.request(app)
               .delete('/items/' + recToDelete._id)
