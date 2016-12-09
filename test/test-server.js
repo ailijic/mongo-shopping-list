@@ -1,4 +1,4 @@
-/* global it, before, after, describe */
+/* global it, before, beforeEach, after, afterEach, describe */
 
 start()
 function start () {
@@ -33,41 +33,56 @@ function start () {
       ]
 
       before(done => server.runServer(
-        () => {
-          Item.create(
-            initDB[0],
-            initDB[1],
-            initDB[2],
-            () => done()
-          )
-        }
+        () => done()
       ))
+
+      beforeEach(done => {
+        Item.remove(() => {
+          Item.create(initDB[0],
+                      initDB[1],
+                      initDB[2],
+                      () => done()
+          )
+        })
+      })
+
+      afterEach(done => {
+        console.log('running `afterEach()`')
+        Item.remove(() => done())
+        /*
+        Item.remove((err, removed) => {
+          if (err) {
+            console.log(err)
+          } else {
+            console.log(removed)
+          }
+          done()
+        })
+        */
+      })
 
       after(done => {
         Item.remove(() => done())
       })
 
       // Generic test
-      function genTest (stat, currentDB, err, res) {
+      function myTest (stat, err, res) {
         expect(err).to.be.null
         res.should.have.status(stat)
         res.should.be.json
-
         Item.find({ name: /.*/ }, (err, docs) => {
-          console.log(docs)
-        })
-
-        // change test so that is compares current DB with initDB
-
-        res.body.should.be.an('array')
-        res.body.length.should.equal(initDB.length)
-        res.body.forEach((data, index) => {
-          data.should.be.an('object')
-          data.should.have.property('_id')
-          data.should.have.property('name')
-          data._id.should.be.a('string')
-          data.name.should.be.a('string')
-          data.name.should.equal(initDB[index].name)
+          if (err) {
+            console.log('Did not get data from the DB: ', err)
+          } else {
+            docs.forEach((data, index) => {
+              data.should.be.an('object')
+              data.should.have.property('_id')
+              data.should.have.property('name')
+              data._id.should.be.an('object')
+              data.name.should.be.a('string')
+              data.name.should.equal(initDB[index].name)
+            })
+          }
         })
       }
 
@@ -75,66 +90,61 @@ function start () {
         chai.request(app)
           .get('/items')
           .end((err, res) => {
+            res.body.should.be.an('array')
+            res.body.length.should.equal(initDB.length)
             const status = 200
-            genTest(status, initDB, err, res)
+            myTest(status, err, res)
             done()
           })
       })
 
       it('should add an item on POST', (done) => {
-        const stat = 201
-        const db = initDB.push({ name: 'Kale' })
-        const myTest = curryIt(aTest, stat, db, done)
+        const postItem = { name: 'Kale' }
+        initDB.push(postItem)
         chai.request(app)
           .post('/items')
-          .send({'name': 'Kale'})
-          .end(myTest)
-          /*
-            (err, res) => {
-            should.equal(err, null)
-            res.should.have.status(201)
-            res.should.be.json
-            res.body.should.be.a('object')
-            res.body.should.have.property('name')
-            res.body.should.have.property('id')
-            res.body.name.should.be.a('string')
-            res.body.id.should.be.a('number')
-            res.body.name.should.equal('Kale')
-            storage.items.should.be.a('array')
-            storage.items.should.have.length(4)
-            storage.items[3].should.be.a('object')
-            storage.items[3].should.have.property('id')
-            storage.items[3].should.have.property('name')
-            storage.items[3].id.should.be.a('number')
-            storage.items[3].name.should.be.a('string')
-            storage.items[3].name.should.equal('Kale')
-            done()
-          })
-          */
-      })
-      /*
-      it('should delete an item on DELETE', (done) => {
-        const id = 2
-        const length = 3
-        chai.request(app)
-          .delete('/items/' + id)
+          .send(postItem)
           .end((err, res) => {
-            should.equal(err, null)
-            res.should.have.status(200)
-            res.should.not.be.json
-            res.body.should.be.a('object')
-            res.body.should.deep.equal({})
-            storage.items.should.be.a('array')
-            storage.items.should.have.length(length)
-            storage.items[id].should.be.a('object')
-            storage.items[id].should.have.property('id')
-            storage.items[id].should.have.property('name')
-            storage.items[id].id.should.be.a('number')
-            storage.items[id].name.should.be.a('string')
-            storage.items[id].name.should.equal('Kale')
+            res.body.should.be.an('object')
+            res.body.name.should.deep.equal(postItem.name)
+            const status = 201
+            myTest(status, err, res)
             done()
           })
       })
+
+      it('should delete an item on DELETE', (done) => {
+        Item.findOne({}, (err, recToDelete) => {
+          if (err) {
+            console.log('DB ERR: ', err)
+          } else {
+            // `recToDelete` is an Object containing one DB record.
+            const removeOneItem = 1
+            const indexToDelete = initDB.findIndex((element, index) => {
+              if (element.name === 'Broad beans') {
+                return true
+              }
+            })
+            initDB.splice(indexToDelete,
+              removeOneItem
+            )
+            chai.request(app)
+              .delete('/items/' + recToDelete._id)
+              .end((err, res) => {
+                res.body.should.be.an('object')
+                res.body.should.have.property('ok')
+                res.body.should.have.property('n')
+                res.body.ok.should.deep.equal(1)
+                res.body.n.should.deep.equal(1)
+                const status = 200
+                myTest(status, err, res)
+                done()
+              })
+          }
+        })
+      })
+
+      /*
       it('should edit an item on PUT', (done) => {
         const id = 2
         const length = 4
@@ -268,16 +278,6 @@ function start () {
           done()
         })
       })  */
-
-      function curryIt (func) {
-        var parameters = Array.prototype.slice.call(arguments, 1)
-        return function () {
-          return func.apply(this, parameters.concat(
-            Array.prototype.slice.call(arguments, 0)
-          ))
-        }
-      }
-
       // ***** END OF MAIN *****
     })
   }
