@@ -8,3 +8,10 @@ addons:
     - mongodb-3.2-precise
     packages:
     - mongodb-org-server
+deploy:
+  provider: heroku
+  api_key:
+    secure: PeG+uOmOqSlsz/Spj74ILn05jx+uLEoUxSuot0RrDw9+KvTKT4WlBnrroI+80mHB5+gWbg4GyPvVZdksmYJGlJLvxtJq8EcvEz7cZF7jt/44T7c/4fu0Tat/wf6qUQMrGX8u7HSjrmjU884w4WPv1p4arwKl8NTnGeYOVmwowRy8AAqVQEqOsmphwRib/hMmCJWc0p9x8CD9A7qUZXDCKlc8XAStkK4kzXp/+JY8Mh4WwsOqCf284Pogk6O4jkPuPEBoBGIUNOleSVlBcpCU8bM3msWwyAhU9hz6DYtKQ1Y89GvGNZXQJNOWVLO2bOdhwFkGE8vdbqWDOIPcNrevbRDieMvuMnUCE7ejbYKm3WSJCuis/YQs+FCxh3lxbwvV1GPfXIu+g0vbkFJEBFS3GWQmg4bJ5ZRxpKb7XAxxand+mKJW0Cm5wnRSKUZzErWpnwh6rlxk94T05Kit1gqRVw96V/Sw5Yqw1HsTtnKbEX87Aj+emRCydAM+O3PJfIim5x/p9uUcWRWMu7Xjjw373kPoIbdlyF4Zwrksfy6Oyl5Ic9TeWJUiMBN0TaPLKNBWZmlgv2y2eP43EFlZDA3DSYWkRrR8lLwIc3dIUc8EfPmiATg+RCK2bgvijAYZoHUZxt4uOpAoZzDjYJwKVGaFmRwmx0h00meFDLSoUUHqVpo=
+  app: stormy-hollows-31275
+  on:
+    repo: ailijic/mongo-shopping-list
